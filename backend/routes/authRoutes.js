@@ -4,40 +4,57 @@ const pool = require("../config/db");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-// Register user
 router.post("/register", async (req, res) => {
 
-  try {
+ try {
 
-    const { name, email, phone, password } = req.body;
+  const {
+   name,
+   email,
+   phone,
+   dob,
+   pan_number,
+   address,
+   city,
+   state,
+   pincode,
+   password
+  } = req.body;
 
-    // hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await bcrypt.hash(password,10);
 
-    const result = await pool.query(
-      `INSERT INTO users (name,email,phone,password)
-       VALUES ($1,$2,$3,$4)
-       RETURNING id,name,email`,
-      [name, email, phone, hashedPassword]
-    );
+  await pool.query(
+   `INSERT INTO users
+   (name,email,phone,password,dob,pan_number,address,city,state,pincode,account_status,kyc_status,balance)
+   VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'pending','pending',0)`,
+   [
+    name,
+    email,
+    phone,
+    hashedPassword,
+    dob,
+    pan_number,
+    address,
+    city,
+    state,
+    pincode
+   ]
+  );
 
-    res.json({
-      message: "User registered successfully",
-      user: result.rows[0]
-    });
+  res.json({
+   message:"Application submitted successfully"
+  });
 
-  } catch (error) {
+ } catch(err) {
 
-    console.error(error);
+  console.log(err);
+  res.status(500).json({
+   error:"Registration failed"
+  });
 
-    res.status(500).json({
-      error: "Registration failed"
-    });
-
-  }
+ }
 
 });
-
 //Login user
 router.post("/login", async (req, res) => {
 

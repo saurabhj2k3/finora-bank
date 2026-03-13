@@ -6,7 +6,12 @@ const kycRoutes = require("./routes/kycRoutes");
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const transactionRoutes = require("./routes/transactionRoutes");
+const adminAuthRoutes = require("./routes/adminAuthRoutes");
 const app = express();
+
+app.use("/api/admin/auth", adminAuthRoutes);
+
+app.use("/uploads", express.static("uploads"));
 
 app.use(cors());
 app.use(express.json());

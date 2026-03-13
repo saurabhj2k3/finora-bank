@@ -8,36 +8,41 @@ const upload = require("../config/multerConfig");
 router.post(
  "/upload",
  authenticateToken,
- upload.single("document"),
- async (req, res) => {
+ upload.fields([
+  { name:"pan_card",maxCount:1 },
+  { name:"aadhaar_card",maxCount:1 },
+  { name:"address_proof",maxCount:1 }
+ ]),
+ async (req,res)=>{
 
-  try {
+  try{
 
    const userId = req.user.userId;
-   const documentType = req.body.document_type;
-   const filePath = req.file.path;
+
+   const pan = req.files.pan_card[0].filename;
+   const aadhaar = req.files.aadhaar_card[0].filename;
+   const address = req.files.address_proof[0].filename;
 
    await pool.query(
-    `INSERT INTO kyc (user_id, document_type, document_image)
-     VALUES ($1,$2,$3)`,
-    [userId, documentType, filePath]
+    `INSERT INTO kyc
+    (user_id,pan_card,aadhaar_card,address_proof,status)
+    VALUES($1,$2,$3,$4,'pending')`,
+    [userId,pan,aadhaar,address]
    );
 
    res.json({
-    message: "KYC uploaded successfully",
-    status: "pending"
+    message:"KYC uploaded successfully"
    });
 
-  } catch (error) {
+  }catch(err){
 
-   console.error(error);
+   console.log(err);
 
    res.status(500).json({
-    error: "KYC upload failed"
+    error:"KYC upload failed"
    });
 
   }
 
- });
-
+});
 module.exports = router;
